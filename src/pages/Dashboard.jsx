@@ -74,6 +74,34 @@ export default function Dashboard() {
     }
   };
 
+  /* ---------------- DELETE JOB ---------------- */
+  const deleteJob = async (id) => {
+    if (!window.confirm("Delete this job description?")) return;
+
+    try {
+      await api.delete(`jobs/${id}/`);
+      setMessage("Job deleted successfully 🗑️");
+      setError("");
+      loadData();
+    } catch {
+      setError("Failed to delete job");
+    }
+  };
+
+  /* ---------------- DELETE RESUME ---------------- */
+  const deleteResume = async (id) => {
+    if (!window.confirm("Delete this resume?")) return;
+
+    try {
+      await api.delete(`resumes/${id}/`);
+      setMessage("Resume deleted successfully 🗑️");
+      setError("");
+      loadData();
+    } catch {
+      setError("Failed to delete resume");
+    }
+  };
+
   /* ---------------- MATCH ---------------- */
   const match = async () => {
     if (!selectedJob || !selectedResume) {
@@ -142,7 +170,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* STATUS MESSAGES */}
+      {/* STATUS */}
       {message && <p className="text-green-400 mb-4">{message}</p>}
       {error && <p className="text-red-400 mb-4">{error}</p>}
 
@@ -178,11 +206,23 @@ export default function Dashboard() {
         {jobs.map((j) => (
           <div
             key={j.id}
-            className="bg-black/60 p-4 rounded-lg cursor-pointer border border-gray-700 hover:border-purple-500"
-            onClick={() => alert(j.job_description)}
+            className="relative bg-black/60 p-4 rounded-lg border border-gray-700 hover:border-purple-500"
           >
-            <h3 className="font-semibold">{j.job_title}</h3>
-            <p className="text-sm text-gray-400">Job Description</p>
+            <h3 className="font-semibold mb-2">{j.job_title}</h3>
+
+            <button
+              onClick={() => alert(j.job_description)}
+              className="text-sm text-purple-400 underline"
+            >
+              View Description
+            </button>
+
+            <button
+              onClick={() => deleteJob(j.id)}
+              className="absolute top-2 right-2 text-red-400 hover:text-red-600"
+            >
+              ❌
+            </button>
           </div>
         ))}
       </div>
@@ -198,11 +238,23 @@ export default function Dashboard() {
         {resumes.map((r) => (
           <div
             key={r.id}
-            className="bg-black/60 p-4 rounded-lg cursor-pointer border border-gray-700 hover:border-purple-500"
-            onClick={() => window.open(r.resume_file)}
+            className="relative bg-black/60 p-4 rounded-lg border border-gray-700 hover:border-purple-500"
           >
-            <h3 className="font-semibold">{r.candidate_name}</h3>
-            <p className="text-sm text-gray-400">Resume</p>
+            <h3 className="font-semibold mb-2">{r.candidate_name}</h3>
+
+            <button
+              onClick={() => window.open(r.resume_file)}
+              className="text-sm text-purple-400 underline"
+            >
+              Open Resume
+            </button>
+
+            <button
+              onClick={() => deleteResume(r.id)}
+              className="absolute top-2 right-2 text-red-400 hover:text-red-600"
+            >
+              ❌
+            </button>
           </div>
         ))}
       </div>
@@ -243,19 +295,16 @@ export default function Dashboard() {
         </button>
       </section>
 
-      {/* ================== RESULT MODAL ================== */}
+      {/* RESULT MODAL */}
       {showModal && result && (() => {
         const theme = getTheme(result.verdict);
 
         return (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
-            <div
-              className={`relative w-full max-w-md p-8 rounded-2xl border-2 
-              ${theme.border} ${theme.bg} shadow-2xl`}
-            >
+            <div className={`relative w-full max-w-md p-8 rounded-2xl border-2 ${theme.border} ${theme.bg}`}>
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-xl text-gray-300 hover:text-white"
+                className="absolute top-4 right-4 text-xl"
               >
                 ✕
               </button>
@@ -264,30 +313,12 @@ export default function Dashboard() {
                 {result.verdict}
               </h2>
 
-              <p className="text-center text-gray-300 mb-6">
-                Candidate–Job Compatibility Result
-              </p>
-
               <div className="text-center">
-                <p className="mb-2">
-                  <span className="text-gray-400">Candidate:</span>{" "}
-                  <span className="font-semibold">{result.candidate}</span>
+                <p className="mb-2"><b>Candidate:</b> {result.candidate}</p>
+                <p className={`text-5xl font-bold ${theme.text}`}>
+                  {result.match_score_percent}%
                 </p>
-
-                <div className="my-6">
-                  <span className={`text-5xl font-extrabold ${theme.text}`}>
-                    {result.match_score_percent}%
-                  </span>
-                  <p className="text-gray-400 mt-1">Match Score</p>
-                </div>
               </div>
-
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-full mt-6 bg-white/10 hover:bg-white/20 py-3 rounded-lg font-semibold"
-              >
-                Close
-              </button>
             </div>
           </div>
         );

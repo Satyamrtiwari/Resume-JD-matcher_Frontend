@@ -16,20 +16,26 @@ export default function Login() {
         password,
       });
 
-      // ✅ SAVE TOKEN PROPERLY
+      // ✅ Save JWT token
       const accessToken = res.data.access;
-      login(accessToken); // context
-      localStorage.setItem("token", accessToken); // 🔥 IMPORTANT
+      login(accessToken);
+      localStorage.setItem("token", accessToken);
 
       navigate("/dashboard");
     } catch (err) {
-      alert("Invalid username or password");
+      console.error("Login error:", err.response?.data);
+
+      // DRF SimpleJWT error message
+      const message =
+        err.response?.data?.detail ||
+        "Login failed. Please check your username and password.";
+
+      alert(message);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white">
-
       {/* TOP BAR */}
       <div className="flex justify-end p-6">
         <button

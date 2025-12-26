@@ -15,15 +15,29 @@ export default function Register() {
         email,
         password,
       });
+
+      alert("Registration successful! Please log in.");
       navigate("/login");
-    } catch {
-      alert("Registration failed. Try different credentials.");
+    } catch (err) {
+      console.error("Register error:", err.response?.data);
+
+      const data = err.response?.data;
+
+      // DRF returns field-wise validation errors
+      if (data) {
+        const messages = Object.entries(data)
+          .map(([field, msgs]) => `${field}: ${msgs.join(", ")}`)
+          .join("\n");
+
+        alert(messages);
+      } else {
+        alert("Registration failed. Please try again.");
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white">
-
       {/* TOP BAR */}
       <div className="flex justify-end p-6">
         <button

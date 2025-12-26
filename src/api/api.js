@@ -2,24 +2,23 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://resume-jd-matcher-backend.onrender.com/api/",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
+// ✅ Attach token correctly
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
-  // 🚫 DO NOT attach token for auth endpoints
   if (
     token &&
     !config.url.includes("login") &&
     !config.url.includes("register")
   ) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    delete config.headers.Authorization;
   }
+
+  // 🔥 IMPORTANT: DO NOT force Content-Type
+  // Axios will auto-set it for JSON or FormData
+  delete config.headers["Content-Type"];
 
   return config;
 });

@@ -15,9 +15,14 @@ export default function Login() {
         username,
         password,
       });
-      login(res.data.access);
+
+      // ✅ SAVE TOKEN PROPERLY
+      const accessToken = res.data.access;
+      login(accessToken); // context
+      localStorage.setItem("token", accessToken); // 🔥 IMPORTANT
+
       navigate("/dashboard");
-    } catch {
+    } catch (err) {
       alert("Invalid username or password");
     }
   };
@@ -43,6 +48,7 @@ export default function Login() {
           <input
             className="w-full p-3 mb-4 rounded-lg bg-gray-100 text-gray-900"
             placeholder="Username"
+            value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
 
@@ -50,6 +56,7 @@ export default function Login() {
             type="password"
             className="w-full p-3 mb-6 rounded-lg bg-gray-100 text-gray-900"
             placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 

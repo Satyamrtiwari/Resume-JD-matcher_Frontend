@@ -21,18 +21,21 @@ export default function Dashboard() {
   /* ---------------- AUTH GUARD ---------------- */
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) navigate("/login");
+    if (!token) {
+      navigate("/login");
+    }
   }, [navigate]);
 
   /* ---------------- LOAD DATA ---------------- */
   const loadData = async () => {
     try {
-      const jobsRes = await api.get("jobs/list/");
-      const resumesRes = await api.get("resumes/list/");
-      setJobs(jobsRes.data);
-      setResumes(resumesRes.data);
-    } catch {
+      const j = await api.get("jobs/list/");
+      const r = await api.get("resumes/list/");
+      setJobs(j.data);
+      setResumes(r.data);
+    } catch (err) {
       setError("Failed to load jobs or resumes");
+      console.error(err.response?.data);
     }
   };
 
@@ -62,13 +65,17 @@ export default function Dashboard() {
       setMessage("Job uploaded successfully ✅");
       loadData();
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to upload job");
+      console.error(err.response?.data);
+      setError(
+        err.response?.data?.detail ||
+        "Failed to upload job"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------- RESUME UPLOAD (FIXED) ---------------- */
+  /* ---------------- RESUME UPLOAD ---------------- */
   const uploadResume = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -93,6 +100,33 @@ export default function Dashboard() {
     }
   };
 
+
+  /* ---------------- DELETE JOB ---------------- */
+  const deleteJob = async (id) => {
+    if (!window.confirm("Delete this job description?")) return;
+
+    try {
+      await api.delete(`jobs/${id}/`);
+      setMessage("Job deleted successfully 🗑️");
+      loadData();
+    } catch {
+      setError("Failed to delete job");
+    }
+  };
+
+  /* ---------------- DELETE RESUME ---------------- */
+  const deleteResume = async (id) => {
+    if (!window.confirm("Delete this resume?")) return;
+
+    try {
+      await api.delete(`resumes/${id}/`);
+      setMessage("Resume deleted successfully 🗑️");
+      loadData();
+    } catch {
+      setError("Failed to delete resume");
+    }
+  };
+
   /* ---------------- MATCH ---------------- */
   const match = async () => {
     if (!selectedJob || !selectedResume) {
@@ -111,7 +145,8 @@ export default function Dashboard() {
 
       setResult(res.data);
       setShowModal(true);
-    } catch {
+    } catch (err) {
+      console.error(err.response?.data);
       setError("Match failed");
     } finally {
       setLoading(false);
@@ -120,10 +155,12 @@ export default function Dashboard() {
 
   /* ---------------- THEME ---------------- */
   const getTheme = (verdict) => {
-    if (verdict === "Strong Match")
+    if (verdict === "Strong Match") {
       return { border: "border-green-400", bg: "bg-green-500/20", text: "text-green-400" };
-    if (verdict === "Moderate Match")
+    }
+    if (verdict === "Moderate Match") {
       return { border: "border-orange-400", bg: "bg-orange-500/20", text: "text-orange-400" };
+    }
     return { border: "border-red-400", bg: "bg-red-500/20", text: "text-red-400" };
   };
 
@@ -131,7 +168,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900 text-white p-8">
 
       {/* NAVBAR */}
-      <div className="flex justify-between mb-8">
+      <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="space-x-4">
           <button onClick={() => navigate("/")} className="bg-gray-700 px-4 py-2 rounded-lg">
@@ -155,18 +192,18 @@ export default function Dashboard() {
       {error && <p className="text-red-400 mb-4">{error}</p>}
 
       {/* JOB UPLOAD */}
-      <section className="bg-gray-900/80 p-6 rounded-xl mb-8">
-        <h2 className="text-purple-400 mb-4">Upload Job Description</h2>
+      <section className="bg-gray-900/80 p-6 rounded-xl mb-8 border border-gray-700">
+        <h2 className="text-xl text-purple-400 mb-4">Upload Job Description</h2>
 
         <input
-          className="w-full mb-3 p-3 rounded-lg text-black"
+          className="w-full mb-3 p-3 rounded-lg bg-white text-black"
           placeholder="Job Title"
           value={jobTitle}
           onChange={(e) => setJobTitle(e.target.value)}
         />
 
         <textarea
-          className="w-full mb-4 p-3 rounded-lg text-black"
+          className="w-full mb-4 p-3 rounded-lg bg-white text-black"
           placeholder="Job Description"
           rows={4}
           value={jobDesc}
@@ -179,27 +216,23 @@ export default function Dashboard() {
       </section>
 
       {/* RESUME UPLOAD */}
-      <section className="bg-gray-900/80 p-6 rounded-xl mb-8">
-        <h2 className="text-purple-400 mb-4">Upload Resume</h2>
+      <section className="bg-gray-900/80 p-6 rounded-xl mb-8 border border-gray-700">
+        <h2 className="text-xl text-purple-400 mb-4">Upload Resume</h2>
         <input type="file" accept=".pdf" onChange={uploadResume} />
       </section>
 
       {/* MATCH */}
-      <section className="bg-gray-900/80 p-6 rounded-xl">
-        <h2 className="text-purple-400 mb-4">Match Resume with Job</h2>
+      <section className="bg-gray-900/80 p-6 rounded-xl border border-gray-700">
+        <h2 className="text-xl text-purple-400 mb-4">Match Resume with Job</h2>
 
-        <select className="w-full mb-4 p-3 rounded-lg text-black" onChange={(e) => setSelectedJob(e.target.value)}>
+        <select className="w-full mb-4 p-3 rounded-lg bg-white text-black" onChange={(e) => setSelectedJob(e.target.value)}>
           <option value="">Select Job</option>
-          {jobs.map((j) => (
-            <option key={j.id} value={j.id}>{j.job_title}</option>
-          ))}
+          {jobs.map((j) => <option key={j.id} value={j.id}>{j.job_title}</option>)}
         </select>
 
-        <select className="w-full mb-4 p-3 rounded-lg text-black" onChange={(e) => setSelectedResume(e.target.value)}>
+        <select className="w-full mb-4 p-3 rounded-lg bg-white text-black" onChange={(e) => setSelectedResume(e.target.value)}>
           <option value="">Select Resume</option>
-          {resumes.map((r) => (
-            <option key={r.id} value={r.id}>{r.candidate_name}</option>
-          ))}
+          {resumes.map((r) => <option key={r.id} value={r.id}>{r.candidate_name}</option>)}
         </select>
 
         <button onClick={match} className="bg-purple-600 px-5 py-2 rounded-lg">
@@ -217,9 +250,7 @@ export default function Dashboard() {
               <h2 className={`text-3xl font-bold mb-4 text-center ${theme.text}`}>
                 {result.verdict}
               </h2>
-              <p className="text-center text-4xl font-bold">
-                {result.match_score_percent}%
-              </p>
+              <p className="text-center text-4xl font-bold">{result.match_score_percent}%</p>
             </div>
           </div>
         );

@@ -33,9 +33,8 @@ export default function Dashboard() {
       const r = await api.get("resumes/list/");
       setJobs(j.data);
       setResumes(r.data);
-    } catch (err) {
+    } catch {
       setError("Failed to load jobs or resumes");
-      console.error(err.response?.data);
     }
   };
 
@@ -64,12 +63,8 @@ export default function Dashboard() {
       setJobDesc("");
       setMessage("Job uploaded successfully ✅");
       loadData();
-    } catch (err) {
-      console.error(err.response?.data);
-      setError(
-        err.response?.data?.detail ||
-        "Failed to upload job"
-      );
+    } catch {
+      setError("Failed to upload job");
     } finally {
       setLoading(false);
     }
@@ -89,17 +84,15 @@ export default function Dashboard() {
     formData.append("resume_file", file);
 
     try {
-      // 🚫 NO headers here — browser sets multipart boundary
       await api.post("resumes/upload/", formData);
       setMessage("Resume uploaded successfully ✅");
       loadData();
-    } catch (err) {
-      setError(err.response?.data?.detail || "Failed to upload resume");
+    } catch {
+      setError("Failed to upload resume");
     } finally {
       setLoading(false);
     }
   };
-
 
   /* ---------------- DELETE JOB ---------------- */
   const deleteJob = async (id) => {
@@ -145,8 +138,7 @@ export default function Dashboard() {
 
       setResult(res.data);
       setShowModal(true);
-    } catch (err) {
-      console.error(err.response?.data);
+    } catch {
       setError("Match failed");
     } finally {
       setLoading(false);
@@ -215,11 +207,59 @@ export default function Dashboard() {
         </button>
       </section>
 
+      {/* JOB CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {jobs.map((j) => (
+          <div
+            key={j.id}
+            className="bg-black/60 p-4 rounded-lg cursor-pointer border border-gray-700 hover:border-purple-500"
+            onClick={() => alert(j.job_description)}
+          >
+            <h3 className="font-semibold">{j.job_title}</h3>
+            <p className="text-sm text-gray-400 mb-2">Job Description</p>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteJob(j.id);
+              }}
+              className="bg-red-600 px-3 py-1 rounded text-sm"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
+
       {/* RESUME UPLOAD */}
       <section className="bg-gray-900/80 p-6 rounded-xl mb-8 border border-gray-700">
         <h2 className="text-xl text-purple-400 mb-4">Upload Resume</h2>
         <input type="file" accept=".pdf" onChange={uploadResume} />
       </section>
+
+      {/* RESUME CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {resumes.map((r) => (
+          <div
+            key={r.id}
+            className="bg-black/60 p-4 rounded-lg cursor-pointer border border-gray-700 hover:border-purple-500"
+            onClick={() => window.open(r.resume_file)}
+          >
+            <h3 className="font-semibold">{r.candidate_name}</h3>
+            <p className="text-sm text-gray-400 mb-2">Resume</p>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteResume(r.id);
+              }}
+              className="bg-red-600 px-3 py-1 rounded text-sm"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
 
       {/* MATCH */}
       <section className="bg-gray-900/80 p-6 rounded-xl border border-gray-700">

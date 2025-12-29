@@ -39,7 +39,7 @@ export default function Landing() {
             <p className="text-gray-400">Match Accuracy</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-purple-400">10K+</p>
+            <p className="text-3xl font-bold text-purple-400">100+</p>
             <p className="text-gray-400">Resumes Analyzed</p>
           </div>
           <div>

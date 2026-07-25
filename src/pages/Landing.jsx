@@ -35,7 +35,7 @@ export default function Landing() {
         {/* STATS */}
         <div className="grid grid-cols-3 gap-10 text-center">
           <div>
-            <p className="text-3xl font-bold text-purple-400">95%</p>
+            <p className="text-3xl font-bold text-purple-400">88+%</p>
             <p className="text-gray-400">Match Accuracy</p>
           </div>
           <div>

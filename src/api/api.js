@@ -10,22 +10,4 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (
-      token &&
-      !config.url.includes("login") &&
-      !config.url.includes("register")
-    ) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // ❌ DO NOT touch Content-Type at all
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 export default api;
